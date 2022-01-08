@@ -1,0 +1,29 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-abbr-reader.ss" "lang")((modname Untitled) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+;;******************************************************************
+;;  Louis Song(20884386)
+;;  Cs 135 Fall 2020
+;;  A05 Question 1
+;;******************************************************************
+;;
+;;question 1a
+;;
+;;(ls-length lsof Any) produces the number of values in lsof Any.
+;;
+;;Examples:
+(check-expect (ls-length
+(make-ls "!" (make-ls 'huh (make-ls 42 'nothing)))) 3)
+
+
+(define-struct ls (first rest))
+;; A (lsof X) is one of:
+;; * 'nothing
+;; * (make-ls X (lsof X))
+
+
+
+(define (ls-length lsof)
+  (cond [(empty? lsof) empty]
+        [(cons? lsof) (+ 1 
+

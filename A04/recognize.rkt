@@ -1,0 +1,205 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-abbr-reader.ss" "lang")((modname recognize) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+;;
+;; ***************************************************
+;; Starter Code
+;; ***************************************************
+;;
+
+(require "templates.rkt")
+
+;; "templates.rkt" provides templates, a TemplateLibrary (see data definition)
+;; It also provides the following test gestures for your recognizer: 
+;;    testd testk tests testy testa testt
+
+
+;; A Point is a (list Num Num)
+
+;; A Gesture is a (listof (list Num Num))
+
+;; A BoundingBox (BB) is a (list Point Point)
+;; requires: the coordinate values in the first point are less than the
+;;             respective values in the second point
+
+;; A TemplateLibrary (TL) is a (listof (list Sym Gesture))
+;; requires: the list is non-empty
+;;           each Sym key is unqiue
+;;           each Gesture value is not both vertical and horizontal
+       
+
+
+
+;; 3a)
+;; These are helper functions. See assignment for design recipe requirements.
+;;
+;; 3ai)
+;;
+;;(get-x p) produces the x-coordinate of the point, p
+;;Examples:
+(check-expect (get-x (list 3 3)) 3)
+(check-expect (get-x (list 0 4)) 0)
+(check-expect (get-x empty) empty)
+
+;;get-x : (Listof Num) -> Num 
+(define (get-x p)
+  (cond [(empty? p) empty]
+        [else (first p)]))
+
+;;(get-y p) produces the y-coordinate of the point,p
+;;Examples:
+(check-expect (get-y (list 4 3)) 3)
+(check-expect (get-y (list 2 4)) 4)
+(check-expect (get-y empty) empty)
+
+;;get-y : (Listof Num) -> Num 
+(define (get-y p)
+  (cond [(empty? p) empty]
+        [else (first(rest p))]))
+;;
+;; 3aii)
+;;
+;;(translate-gesture Gesture x-scale y-scale) consumes Gesture and
+;;two-numbers, x-scale and y-scale, and produces a new stroke.
+;;Examples :
+(check-expect (translate-gesture (list 3 4) 3 4) (list 6 8))
+(check-expect (translate-gesture (list 2 8) 2 4) (list 4 12))
+
+;;translate-gesture : (listof Num) -> (listof Num)
+(define (translate-gesture Gesture x-scale y-scale)
+  (cond [(empty? Gesture) empty]
+        [else (cons (first(sum Gesture y-scale))
+                    (translate-gesture (rest Gesture) x-scale y-scale))]))
+
+(define (sum x y)
+   (cond [(empty? x) empty]
+        [else (cons (+ y (first x))
+                    (sum (rest x) y))]))
+        
+ 
+;; 3b)
+;; Full design recipe required.
+
+
+;; 3c) Starter code definitions
+
+;; 3ci)
+;;(five-sample gesture) produces a sampling of gesture 5 points
+;;  the first, n/4th, n/2th, 3n/4th, and last point.
+;; Examples:
+(check-expect (five-sample (list (list 1 1) (list 2 2)))
+              (list (list 1 1) (list 1 1) (list 2 2) (list 2 2) (list 2 2)))
+(check-expect (five-sample (list (list 1 1) (list 2 2) (list 3 3) (list 4 4)
+                                (list 5 5) (list 6 6) (list 7 7) (list 8 8)))
+              (list (list 1 1) (list 3 3) (list 5 5) (list 7 7) (list 8 8)))
+
+
+
+;; five-sample: Gesture -> Gesture
+;; requires: gesture is non-empty
+
+
+
+;; Tests:
+(check-expect (five-sample (list (list 1 1) (list 2 2) (list 3 3) (list 4 4)))
+              (list (list 1 1) (list 2 2) (list 3 3) (list 4 4) (list 4 4)))
+(check-expect (five-sample (list (list 1 1)))
+              (list (list 1 1) (list 1 1) (list 1 1) (list 1 1) (list 1 1)))
+(check-expect (five-sample (list (list 1 1) (list 2 2) (list 3 3) (list 4 4)
+                                 (list 5 5)))
+              (list (list 1 1) (list 2 2) (list 3 3) (list 4 4) (list 5 5)))
+
+
+;; 3cii)
+
+;;(move-and-scale gesture x-scale y-scale) moves gesture to (0, 0) and
+;;  scales it by (x-scale)x(y-scale)
+;; Examples:
+(check-expect (move-and-scale (list (list 1 1)) 1 1) (list (list 0 0)))
+(check-expect (move-and-scale (list (list 1 5) (list 3 4)) 1 2)
+              (list (list 0 2) (list 2 0)))
+
+;; move-and-scale: Gesture Num Num -> Gesture
+;; requires: gesture is non-empty
+;;           x-scale > 0
+;;           y-scale > 0
+
+
+
+
+;; Test:
+(check-expect (move-and-scale (list (list 5 5) (list 2 2)) 3 0.5)
+              (list (list 9 1.5) (list 0 0)))
+
+
+
+;; 3ciii)
+
+(define min-width 30)
+(define min-height 30)
+(define norm-size 200)
+
+;;(normalize-gesture gesture) normalizes gesture to (0,0) and a standard size
+;; Examples:
+(check-within (normalize-gesture (list (list 0 0) (list 100 100)))
+              (list (list 0 0) (list 200 200)) 0.01)
+(check-within (normalize-gesture (list (list 100 0) (list 100 50) (list 200 50)))
+              (list (list 0 0) (list 0 200) (list 200 200)) 0.01)
+
+;; normalize-gesture: Gesture -> Gesture
+;; requires: gesture is not both vertical and horizontal
+;;           gesture is non-empty
+
+
+
+
+;; Tests:
+(check-within (normalize-gesture (list (list 0 0) (list 100 30)))
+              (list (list 0 0) (list 200 200)) 0.01)
+(check-within (normalize-gesture (list (list 0 0) (list 100 29)))
+              (list (list 0 0) (list 200 29)) 0.01)
+(check-within (normalize-gesture (list (list 0 0) (list 30 100)))
+              (list (list 0 0) (list 200 200)) 0.01)
+(check-within (normalize-gesture (list (list 0 0) (list 29 100)))
+              (list (list 0 0) (list 29 200)) 0.01)
+(check-within (normalize-gesture (list (list 0 0) (list 400 400)))
+              (list (list 0 0) (list 200 200)) 0.01)
+
+
+
+;; 3civ)
+
+;;(geometric-5match gesture1 gesture2) produces the average distance between
+;;  points in sub-sampled gesture1 and gesture2 after sub-sampling them with k points
+;; Examples:
+(check-within (geometric-5match
+               (list (list 10 10) (list 30 30) (list 50 50) (list 70 70) (list 80 80))
+               (list (list 10 10) (list 20 20) (list 30 30) (list 40 40) (list 40 40)))
+               16.16 0.01)
+
+;; geometric-5match: Gesture Gesture -> Num
+;; requires: gesture1 and gesture2 are each not both vertical and horizontal
+
+
+
+
+;; Tests:
+
+
+
+;; 3cv)
+
+;;(five-point-rec candidate template-library) produces the symbol in
+;;  template-library closest to candidate
+;; Examples:
+(check-expect (five-point-rec testd templates) 'd)
+(check-expect (five-point-rec testk templates) 'k)
+
+
+;; five-point-rec Gesture TL -> Sym
+;; requires: candidate is not both vertical and horizontal
+
+;; Tests
+(check-expect (five-point-rec tests templates) 's)
+(check-expect (five-point-rec testy templates) 'y)
+;; 
